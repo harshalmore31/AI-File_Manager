@@ -431,32 +431,92 @@ class FileSystemReorganizer:
         logger.info("Executing reorganization")
         self.executed_operations = []
         
-        try:
-            for operation in self.operations:
+        for operation in self.operations:
+            try:
                 op_type, paths = operation.split(": ", 1)
                 
                 if op_type == "CREATE_DIR":
                     path = Path(paths)
-                    path.mkdir(parents=True, exist_ok=True)
-                    self.executed_operations.append(f"Created directory: {path}")
+                    try:
+                        # Check if directory already exists
+                        if not path.exists():
+                            path.mkdir(parents=True, exist_ok=True)
+                            logger.info(f"Created directory: {path}")
+                            self.executed_operations.append(f"Created directory: {path}")
+                        else:
+                            logger.info(f"Directory already exists: {path}")
+                    except PermissionError:
+                        logger.error(f"Permission denied when creating directory: {path}")
+                        raise
+                    except Exception as e:
+                        logger.error(f"Error creating directory {path}: {e}")
+                        raise
                 
                 elif op_type == "MOVE":
-                    source, target = paths.split(" → ")
+                    source, target = map(str.strip, paths.split(" → "))
                     source_path = Path(source)
                     target_path = Path(target)
                     
-                    if source_path.exists():
+                    try:
+                        # Validate source exists
+                        if not source_path.exists():
+                            logger.error(f"Source file not found: {source}")
+                            continue
+                        
+                        # Create target directory if it doesn't exist
                         target_path.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.move(str(source_path), str(target_path))
-                        self.executed_operations.append(f"Moved: {source} → {target}")
-                    else:
-                        logger.warning(f"Source file not found: {source}")
-                
-        except Exception as e:
-            logger.error(f"Error during reorganization: {e}")
-            raise
+                        
+                        # Check if target already exists
+                        if target_path.exists():
+                            logger.warning(f"Target file already exists: {target}")
+                            # Generate unique name
+                            base = target_path.stem
+                            suffix = target_path.suffix
+                            counter = 1
+                            while target_path.exists():
+                                target_path = target_path.with_name(f"{base}_{counter}{suffix}")
+                                counter += 1
+                            logger.info(f"Using alternative target path: {target_path}")
+                        
+                        # Attempt to move the file
+                        try:
+                            shutil.move(str(source_path), str(target_path))
+                            logger.info(f"Successfully moved: {source} → {target_path}")
+                            self.executed_operations.append(f"Moved: {source} → {target_path}")
+                        except PermissionError:
+                            logger.error(f"Permission denied when moving file: {source}")
+                            # Try copy and delete as fallback
+                            try:
+                                shutil.copy2(str(source_path), str(target_path))
+                                source_path.unlink()
+                                logger.info(f"Successfully copied and deleted: {source} → {target_path}")
+                                self.executed_operations.append(f"Copied and deleted: {source} → {target_path}")
+                            except Exception as e:
+                                logger.error(f"Fallback copy-delete failed for {source}: {e}")
+                                raise
+                        except Exception as e:
+                            logger.error(f"Error moving file {source}: {e}")
+                            raise
+                    
+                    except Exception as e:
+                        logger.error(f"Error processing move operation {source} → {target}: {e}")
+                        raise
+            
+            except Exception as e:
+                logger.error(f"Error during operation '{operation}': {e}")
+                # Optionally, you might want to raise the exception here to stop the process
+                # raise
+                continue
         
-        logger.info("Reorganization completed successfully")
+        # Verify operations
+        success_count = len([op for op in self.executed_operations if op.startswith("Moved") or op.startswith("Copied")])
+        total_moves = len([op for op in self.operations if op.startswith("MOVE")])
+        
+        if success_count < total_moves:
+            logger.warning(f"Only {success_count} out of {total_moves} move operations completed successfully")
+        else:
+            logger.info("All move operations completed successfully")
+        
         return self.executed_operations
 
 def main():
