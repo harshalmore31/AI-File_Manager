@@ -1,0 +1,52 @@
+category_mapping:
+  archives:
+  - .zip
+  - .rar
+  - .tar
+  - .gz
+  - .7z
+  code:
+  - .py
+  - .js
+  - .java
+  - .cpp
+  - .h
+  - .css
+  - .html
+  documents:
+  - .pdf
+  - .docx
+  - .doc
+  - .txt
+  - .pptx
+  - .xlsx
+  - .csv
+  executables:
+  - .exe
+  - .msi
+  - .apk
+  media:
+  - .mp4
+  - .avi
+  - .mkv
+  - .jpg
+  - .jpeg
+  - .png
+  - .gif
+  others: []
+duplicate_handling: rename
+logging:
+  backup_count: 3
+  level: INFO
+  max_size: 5242880
+max_depth: 3
+min_file_size: 3072
+skip_patterns:
+- node_modules
+- \.git
+- \.venv
+- __pycache__
+- \.idea
+- venv
+- dist
+- build

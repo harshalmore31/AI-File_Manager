@@ -1,0 +1,7 @@
+2025-01-16 20:14:35,500 - root - ERROR - Unexpected error: Console.print() got an unexpected keyword argument 'file'
+2025-01-16 20:19:02,861 - root - ERROR - Unexpected error: Console.print() got an unexpected keyword argument 'file'
+2025-01-16 20:27:37,648 - root - ERROR - Unexpected error: Console.print() got an unexpected keyword argument 'file'
+2025-01-16 20:28:44,670 - root - ERROR - Unexpected error: Console.print() got an unexpected keyword argument 'file'
+2025-01-16 20:29:49,161 - root - ERROR - Move failed: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\harsh\\Downloads\\media\\mkv\\Sacred Games S01E04 2018 1080P NF WEBRiP x265 DD 5.1 HEVC ESUB [Topmovies.tel].mkv'
+2025-01-16 20:30:01,907 - root - ERROR - Unexpected error: Console.print() got an unexpected keyword argument 'file'
+2025-01-16 21:29:01,160 - root - ERROR - Unexpected error: Console.print() got an unexpected keyword argument 'file'
